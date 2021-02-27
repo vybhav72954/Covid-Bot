@@ -1,17 +1,24 @@
-# import needed libraries
+# IMPORTS
+
 from twilio.rest import Client
 import pandas as pd
 import requests
 from datetime import datetime
 import decouple
 
-# copied from twilio API
+# Twilio Details
 account_sid = decouple.config("SID")  # please change it to your own
 auth_token = decouple.config("TOKEN")  # please change it to your own
 client = Client(account_sid, auth_token)
 
 
 def send_message(receiver, message):
+    """
+    Send message to receivers using the Twilio account.
+    :param receiver: Number of Receivers
+    :param message: Message to be Sent
+    :return: Sends the Message
+    """
     message = client.messages.create(
         from_='whatsapp:+14155238886',
         body=message,
@@ -20,21 +27,23 @@ def send_message(receiver, message):
     return message
 
 
-# receiver number
+# The list of Receivers, setup the .env file accordingly for maximum safety. See README
 receiver_list = [decouple.config("NUM")]
 
-# get content covid report in Indonesia
+# Covid Report of India. See README fir Info.
 url = "https://api.apify.com/v2/key-value-stores/toDWvRj1JpTXiM8FF/records/LATEST?disableRedirect=true"
 data_json = requests.get(url).json()
 
+# Reading the Information form JSON data.
 df = []
 for row in range(len(data_json["regionData"])):
     df.append(data_json["regionData"][row])
 df = pd.DataFrame(df)
+# Sorted top 3 states according to New-Infections
 data = df.sort_values(['newInfected'], ascending=False)[:3]
 
-# present the data by translating the dataframe to string
 
+# Final Message to be sent
 region_name = data["region"].tolist()
 current_timestamp = str(datetime.now().date())
 messages = f"Last Updated on: {current_timestamp}\n" \
@@ -42,6 +51,7 @@ messages = f"Last Updated on: {current_timestamp}\n" \
 for regions in region_name:
     each_row = data[data["region"] == regions]
 
+    # The Information contained in the message.
     message_partition = f"""
     [{regions}]
     |   Total Infected = {str(each_row['totalInfected'].tolist()[0])}
