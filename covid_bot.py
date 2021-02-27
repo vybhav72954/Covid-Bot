@@ -3,10 +3,11 @@ from twilio.rest import Client
 import pandas as pd
 import requests
 from datetime import datetime
+import decouple
 
 # copied from twilio API
-account_sid = ""  # please change it to your own
-auth_token = ""  # please change it to your own
+account_sid = decouple.config("SID")  # please change it to your own
+auth_token = decouple.config("TOKEN")  # please change it to your own
 client = Client(account_sid, auth_token)
 
 
@@ -20,7 +21,7 @@ def send_message(receiver, message):
 
 
 # receiver number
-receiver_list = ['+918586094922']
+receiver_list = [decouple.config("NUM")]
 
 # get content covid report in Indonesia
 url = "https://api.apify.com/v2/key-value-stores/toDWvRj1JpTXiM8FF/records/LATEST?disableRedirect=true"
